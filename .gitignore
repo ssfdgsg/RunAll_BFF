@@ -4,6 +4,7 @@
 *.exe~
 *.dll
 *.dylib
+*.pb.go
 
 # Test binary, built with `go test -c`
 *.test
@@ -28,6 +29,7 @@ Thumbs.db
 
 # project
 *.cert
+*.crt
 *.key
 *.log
 bin/
@@ -36,3 +38,5 @@ bin/
 .vscode/
 .idea/
 *.swp
+/AGENTS.md
+/NUL

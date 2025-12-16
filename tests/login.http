@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:7999
+
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "demo1@example.com",
+  "password": "demo123456"
+}
+
+> {% client.global.set("token", response.body.token); %}
+

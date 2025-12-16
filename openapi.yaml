@@ -3,19 +3,91 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
-    description: The greeting service definition.
+    title: ""
     version: 0.0.1
 paths:
-    /helloworld/{name}:
+    /api/user/login:
+        post:
+            tags:
+                - UserService
+            operationId: UserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.LoginReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.LoginResp'
+    /api/user/register:
+        post:
+            tags:
+                - UserService
+            operationId: UserService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.RegisterReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.RegisterResp'
+    /api/users/login:
+        post:
+            tags:
+                - User
+            description: 2.登录账户
+            operationId: User_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.LoginReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.LoginReply'
+    /api/users/register:
+        post:
+            tags:
+                - User
+            description: 1.注册账户
+            operationId: User_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.RegisterReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.RegisterReply'
+    /api/users/{userId}:
         get:
             tags:
-                - Greeter
-                - subgroup
-            description: Sends a greeting
-            operationId: Greeter_SayHello
+                - User
+            description: 3.获取用户信息
+            operationId: User_GetUser
             parameters:
-                - name: name
+                - name: userId
                   in: path
                   required: true
                   schema:
@@ -26,14 +98,272 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
+                                $ref: '#/components/schemas/api.user.v1.GetUserReply'
+    /api/users/{userId}/resources:
+        get:
+            tags:
+                - User
+            description: 4.列出全部资源
+            operationId: User_ListResources
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  schema:
+                    type: string
+                    format: date-time
+                - name: end
+                  in: query
+                  schema:
+                    type: string
+                    format: date-time
+                - name: type
+                  in: query
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.ListResourcesReply'
+    /user/{userId}:
+        get:
+            tags:
+                - UserService
+            operationId: UserService_GetUser
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetUserReply'
+    /v1/resources:
+        get:
+            tags:
+                - ResourceService
+            description: 1. 列出全部资源
+            operationId: ResourceService_ListResources
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: start
+                  in: query
+                  schema:
+                    type: string
+                    format: date-time
+                - name: end
+                  in: query
+                  schema:
+                    type: string
+                    format: date-time
+                - name: type
+                  in: query
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/resource.v1.ListResourcesReply'
 components:
     schemas:
-        helloworld.v1.HelloReply:
+        api.user.v1.GetUserReply:
             type: object
             properties:
-                message:
+                userId:
                     type: string
-            description: The response message containing the greetings
+                email:
+                    type: string
+                nickname:
+                    type: string
+                userStatus:
+                    type: integer
+                    format: enum
+        api.user.v1.ListResourcesReply:
+            type: object
+            properties:
+                resources:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.user.v1.Resource'
+                specs:
+                    type: object
+                    additionalProperties:
+                        $ref: '#/components/schemas/api.user.v1.ResourceSpec'
+        api.user.v1.LoginReply:
+            type: object
+            properties:
+                token:
+                    type: string
+        api.user.v1.LoginReq:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        api.user.v1.RegisterReply:
+            type: object
+            properties:
+                userId:
+                    type: string
+        api.user.v1.RegisterReq:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+        api.user.v1.Resource:
+            type: object
+            properties:
+                instanceId:
+                    type: string
+                name:
+                    type: string
+                userId:
+                    type: string
+                type:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        api.user.v1.ResourceSpec:
+            type: object
+            properties:
+                instanceId:
+                    type: string
+                cpuCores:
+                    type: integer
+                    format: uint32
+                memorySize:
+                    type: integer
+                    format: uint32
+                gpu:
+                    type: integer
+                    format: uint32
+                image:
+                    type: string
+                customConfig:
+                    type: object
+        resource.v1.ListResourcesReply:
+            type: object
+            properties:
+                resources:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/resource.v1.Resource'
+                specs:
+                    type: object
+                    additionalProperties:
+                        $ref: '#/components/schemas/resource.v1.ResourceSpec'
+        resource.v1.Resource:
+            type: object
+            properties:
+                instanceId:
+                    type: string
+                name:
+                    type: string
+                userId:
+                    type: string
+                type:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            description: =====================实体/值对象=======================
+        resource.v1.ResourceSpec:
+            type: object
+            properties:
+                instanceId:
+                    type: string
+                cpuCores:
+                    type: integer
+                    format: uint32
+                memorySize:
+                    type: integer
+                    format: uint32
+                gpu:
+                    type: integer
+                    format: uint32
+                image:
+                    type: string
+                customConfig:
+                    type: object
+        user.v1.GetUserReply:
+            type: object
+            properties:
+                userId:
+                    type: string
+                email:
+                    type: string
+                nickname:
+                    type: string
+                userStatus:
+                    type: integer
+                    format: enum
+        user.v1.LoginReq:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        user.v1.LoginResp:
+            type: object
+            properties:
+                token:
+                    type: string
+        user.v1.RegisterReq:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+        user.v1.RegisterResp:
+            type: object
+            properties:
+                userId:
+                    type: string
 tags:
-    - name: Greeter
+    - name: ResourceService
+    - name: User
+    - name: UserService

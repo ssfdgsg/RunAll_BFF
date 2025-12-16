@@ -1,0 +1,7 @@
+@baseUrl = http://localhost:7999
+@userId = {{userId}}
+@token = {{token}}
+
+GET {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{token}}
+

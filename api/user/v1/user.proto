@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "bff/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.user.v1";
+option java_outer_classname = "UserProtoV1";
+
+service User {
+	// 1.注册账户
+  rpc Register (RegisterReq) returns (RegisterReply) {
+    option (google.api.http) = {
+      post: "/api/users/register"
+      body: "*"
+    };
+  }
+  // 2.登录账户
+  rpc Login (LoginReq) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/api/users/login"
+      body: "*"
+    };
+  }
+  // 3.获取用户信息
+  rpc GetUser (GetUserReq) returns (GetUserReply) {
+    option (google.api.http) = {
+      get: "/api/users/{user_id}"
+    };
+  }
+  // 4.列出全部资源
+  rpc ListResources (ListResourcesReq) returns (ListResourcesReply) {
+    option (google.api.http) = {
+      get: "/api/users/{user_id}/resources"
+    };
+  }
+}
+
+message RegisterReq {
+  string email = 1;
+  string password = 2;
+  string nickname = 3;
+}
+
+message RegisterReply {
+  string user_id = 1;
+}
+
+message LoginReq {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginReply {
+  string token = 1;
+}
+
+message GetUserReq {
+  string user_id = 1;
+}
+
+message GetUserReply {
+  string user_id = 1;
+  string email = 2;
+  string nickname = 3;
+  Status user_status = 4;
+}
+
+enum Status {
+  ACTIVE = 0;
+  INACTIVE = 1;
+  BANNED = 2;
+}
+
+message Resource {
+  int64 instance_id = 1;
+  string name = 2;
+  string user_id = 3;
+  string type = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message ResourceSpec {
+  int64 instance_id = 1;
+  uint32 cpu_cores = 2;
+  uint32 memory_size = 3;
+  uint32 gpu = 4;
+  string image = 5;
+  optional google.protobuf.Struct custom_config = 6;
+}
+
+message ListResourcesReq {
+  string user_id = 1;
+  optional google.protobuf.Timestamp start = 2;
+  optional google.protobuf.Timestamp end = 3;
+  optional string type = 4;
+  optional google.protobuf.FieldMask field_mask = 5;
+}
+
+message ListResourcesReply {
+  repeated Resource resources = 1;
+  map<string, ResourceSpec> specs = 2;
+}

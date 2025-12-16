@@ -1,10 +1,10 @@
 server:
   http:
-    addr: 0.0.0.0:8000
-    timeout: 1s
+    addr: 0.0.0.0:7999
+    timeout: 100s
   grpc:
-    addr: 0.0.0.0:9000
-    timeout: 1s
+    addr: 0.0.0.0:8999
+    timeout: 100s
 data:
   database:
     driver: mysql
@@ -13,3 +13,11 @@ data:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+
+# 其他微服务地址 (硬编码)
+service:
+  resource:
+    addr: 127.0.0.1:9000
+  user:
+    addr: 127.0.0.1:9001
+

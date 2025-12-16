@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package user.v1;
+option go_package = "api/user/v1;v1";
+
+import "google/api/annotations.proto";
+
+service UserService{
+  rpc Register(RegisterReq) returns (RegisterResp){
+    option (google.api.http) = {
+      post: "/api/user/register"
+      body: "*"
+    };
+  }
+
+  rpc Login(LoginReq) returns (LoginResp){
+    option (google.api.http) = {
+      post: "/api/user/login"
+      body: "*"
+    };
+  }
+
+  rpc GetUser(GetUserRequest) returns (GetUserReply) {
+    option (google.api.http) = {
+      get: "/user/{user_id}"
+    };
+  }
+}
+
+message RegisterReq {
+  string email = 1;
+  string password = 2;
+  string nickname = 3;
+}
+
+message RegisterResp {
+  string user_id = 1;
+}
+
+message LoginReq {
+  string email = 1;
+  string password = 2;
+}
+
+message   LoginResp {
+  string token = 1;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserReply {
+  string user_id = 1;
+  string email = 2;
+  string nickname = 3;
+  status user_status = 4;
+}
+
+enum status {
+  ACTIVE = 0;
+  INACTIVE = 1;
+  BANNED = 2;
+}
