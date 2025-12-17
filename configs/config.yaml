@@ -17,7 +17,7 @@ data:
 # 其他微服务地址 (硬编码)
 service:
   resource:
-    addr: 127.0.0.1:9000
+    addr: quic://127.0.0.1:9000
   user:
     addr: 127.0.0.1:9001
 

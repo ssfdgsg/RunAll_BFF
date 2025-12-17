@@ -1,11 +1,16 @@
 package data
 
 import (
+	"context"
+	"crypto/tls"
 	"errors"
+	"os"
+	"strings"
 
 	resourcev1 "bff/api/service/resource/v1"
 	userv1 "bff/api/service/user/v1"
 	"bff/internal/conf"
+	"bff/internal/pkg/grpcquic"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
@@ -32,13 +37,13 @@ func NewServiceClients(c *conf.Service, logger log.Logger) (*ServiceClients, fun
 
 	helper := log.NewHelper(logger)
 
-	userConn, err := grpc.Dial(c.User.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userConn, err := dialServiceConn(context.Background(), c.User.Addr)
 	if err != nil {
 		helper.Errorf("failed to dial user service: %v", err)
 		return nil, nil, err
 	}
 
-	resourceConn, err := grpc.Dial(c.Resource.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	resourceConn, err := dialServiceConn(context.Background(), c.Resource.Addr)
 	if err != nil {
 		_ = userConn.Close()
 		helper.Errorf("failed to dial resource service: %v", err)
@@ -59,4 +64,50 @@ func NewServiceClients(c *conf.Service, logger log.Logger) (*ServiceClients, fun
 		UserClient:     userv1.NewUserServiceClient(userConn),
 		ResourceClient: resourcev1.NewResourceServiceClient(resourceConn),
 	}, cleanup, nil
+}
+
+func dialServiceConn(ctx context.Context, addr string) (*grpc.ClientConn, error) {
+	if target, ok := quicTarget(addr); ok {
+		tlsConf := quicTLSConfig()
+		creds := grpcquic.NewCredentials(tlsConf)
+		dialer := grpcquic.NewQuicDialer(tlsConf, nil)
+		return grpc.DialContext(ctx, target,
+			grpc.WithContextDialer(dialer),
+			grpc.WithTransportCredentials(creds),
+		)
+	}
+
+	return grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+}
+
+func quicTarget(addr string) (string, bool) {
+	a := strings.TrimSpace(addr)
+	for _, prefix := range []string{"quic://", "quic-grpc://", "grpc-quic://", "quic+grpc://"} {
+		if strings.HasPrefix(a, prefix) {
+			return strings.TrimPrefix(a, prefix), true
+		}
+	}
+	return "", false
+}
+
+func quicTLSConfig() *tls.Config {
+	alpn := strings.TrimSpace(os.Getenv("BFF_QUIC_ALPN"))
+	if alpn == "" {
+		alpn = "grpc-quic"
+	}
+
+	insecureSkipVerify := true
+	if envFalse(os.Getenv("BFF_QUIC_INSECURE_SKIP_VERIFY")) {
+		insecureSkipVerify = false
+	}
+
+	return &tls.Config{
+		InsecureSkipVerify: insecureSkipVerify,
+		NextProtos:         []string{alpn},
+	}
+}
+
+func envFalse(v string) bool {
+	s := strings.ToLower(strings.TrimSpace(v))
+	return s == "0" || s == "false" || s == "no" || s == "off"
 }

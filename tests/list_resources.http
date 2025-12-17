@@ -2,6 +2,5 @@
 @userId = {{userId}}
 @token = {{token}}
 
-GET {{baseUrl}}/api/users/{{userId}}/resources
-Authorization: Bearer {{token}}
-
+GET {{baseUrl}}/api/users/7de5d3bc-c5d7-44d0-a5bb-a94be248f523/resources
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiN2RlNWQzYmMtYzVkNy00NGQwLWE1YmItYTk0YmUyNDhmNTIzIiwiZW1haWwiOiJkZW1vMUBleGFtcGxlLmNvbSIsInJvbGVzIjpbInVzZXIiXSwiaXNzIjoidXNlci1zZXJ2aWNlIiwic3ViIjoiZGVtbzFAZXhhbXBsZS5jb20iLCJleHAiOjE3NjYwMjgyNjYsImlhdCI6MTc2NTk0MTg2Nn0.IriXvkhmTSfuFgCpP0eVo51NNlZHdXvWPaN5wTKU5FM
